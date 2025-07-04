@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Dynamic Résumé</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<style>
+			/* ===== base layout ===== */
+			body {
+				font-family: system-ui, Arial, Helvetica, sans-serif;
+				margin: 0;
+				padding: 0;
+				color: #111;
+			}
+			.page {
+				max-width: 780px;
+				margin: 0 auto;
+				padding: 2rem 2.2rem;
+			}
+			h1,
+			h2,
+			h3 {
+				margin: 0 0 0.4rem;
+				font-weight: 700;
+			}
+			h1 {
+				font-size: 1.75rem;
+			}
+			h2 {
+				font-size: 1.25rem;
+				margin-top: 1.1rem;
+				border-bottom: 1px solid #ccc;
+				padding-bottom: 0.2rem;
+			}
+			h3 {
+				font-size: 1.05rem;
+				margin-top: 0.8rem;
+			}
+			ul {
+				margin: 0.3rem 0 0.9rem 1.4rem;
+				padding: 0;
+			}
+			li {
+				margin: 0.25rem 0;
+			}
+			.meta {
+				font-style: italic;
+				margin-bottom: 0.8rem;
+			}
+			.two-col {
+				display: flex;
+				justify-content: space-between;
+				gap: 1rem;
+			}
+			.right {
+				text-align: right;
+			}
+			.tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem;
+			}
+			.tag {
+				background: #e7f1ff;
+				padding: 0.15rem 0.5rem;
+				border-radius: 0.3rem;
+				font-size: 0.8rem;
+			}
+
+			/* ===== print friendliness ===== */
+			@media print {
+				body {
+					margin: 0;
+				}
+				.page {
+					page-break-after: always;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- where the résumé will appear -->
+		<div id="root"></div>
+
+		<!-- Option A: load external JSON -->
+		<script
+			data-src="sample_resume.json"
+			id="resume-data"
+			type="application/json">
+            {
+                "basics": {
+                  "name": "Johnathan W. Smith",
+                  "headline": "Senior Early-Childhood Development Specialist",
+                  "address": "2002 Front Range Way, Fort Collins CO 80525",
+                  "phone": "+1 (970) 555-0193",
+                  "email": "jwsmith@example.com",
+                  "linkedin": "linkedin.com/in/jwsmith",
+                  "website": "jwsmith.dev"
+                },
+              
+                "careerSummary": "Early-childhood educator and program manager with 12 years’ experience leading multidisciplinary teams, designing evidence-based curricula, and securing > $1 million in grant funding. Passionate about inclusive learning environments.",
+              
+                "education": [
+                  {
+                    "institution": "University of Arkansas at Little Rock",
+                    "location": "Little Rock, AR",
+                    "degree": "M.Ed. Early Childhood Education",
+                    "year": 2001,
+                    "gpa": 3.9,
+                    "highlights": [
+                      "Dean’s List six consecutive semesters",
+                      "Graduate Assistant, Child Development Lab"
+                    ]
+                  },
+                  {
+                    "institution": "University of Arkansas at Little Rock",
+                    "location": "Little Rock, AR",
+                    "degree": "B.S. Early Childhood Development",
+                    "year": 1999,
+                    "gpa": 3.8
+                  }
+                ],
+              
+                "employmentHistory": [
+                  {
+                    "title": "Program Director",
+                    "company": "Rainbow Special Care Center",
+                    "location": "Little Rock, AR",
+                    "start": "2016-03",
+                    "end": "Present",
+                    "bullets": [
+                      "Oversee daily operations for a 120-child special-needs facility with a staff of 45.",
+                      "Launched a STEM-based sensory curriculum adopted by 4 partner schools.",
+                      "Reduced staff turnover from 22 % to 9 % via mentorship & quarterly workshops."
+                    ]
+                  },
+                  {
+                    "title": "Counseling Supervisor",
+                    "company": "The Wesley Center",
+                    "location": "Little Rock, AR",
+                    "start": "2011-06",
+                    "end": "2016-02",
+                    "bullets": [
+                      "Managed caseloads for 150 adult clients with developmental disabilities.",
+                      "Implemented digital record-keeping that cut documentation time by 35 %."
+                    ]
+                  },
+                  {
+                    "title": "Client Specialist",
+                    "company": "Cowell Elementary School",
+                    "location": "Conway, AR",
+                    "start": "2005-08",
+                    "end": "2011-05",
+                    "bullets": [
+                      "Co-taught inclusive classrooms (K-5) with focus on adaptive technology.",
+                      "Trained 25+ teachers on IEP compliance and differentiated instruction."
+                    ]
+                  }
+                ],
+              
+                "projects": [
+                  {
+                    "name": "Inclusive Play Toolkit",
+                    "period": "2023",
+                    "description": "Open-source library of 50+ sensory-friendly classroom activities, downloaded 12 000 times globally.",
+                    "tech": ["Figma", "Canva", "Google Sites"]
+                  },
+                  {
+                    "name": "GrantTrack CRM",
+                    "period": "2020",
+                    "description": "Custom Airtable/Make.com workflow that tracks grant applications and automates reminders; improved funding hit-rate by 18 %.",
+                    "tech": ["Airtable", "Make.com", "Zapier"]
+                  }
+                ],
+              
+                "achievements": [
+                  "2024 — *NASET Outstanding Program Innovation Award*",
+                  "2022 — Secured $450 000 DOE grant for rural early-learning initiatives",
+                  "2021 — Speaker at SXSW EDU: \"Designing Sensory-Rich STEM Labs\""
+                ],
+              
+                "skills": [
+                  "Curriculum Design", "IEP Compliance", "Team Leadership",
+                  "Grant Writing", "ASL (Basic)", "Google Workspace", "Airtable",
+                  "Tableau", "First Aid/CPR"
+                ]
+              }
+              
+        </script>
+
+		<!-- Option B: uncomment & paste JSON directly -->
+<script id="resume-data" type="application/json">
+    {
+        "basics": {
+          "name": "Johnathan W. Smith",
+          "headline": "Senior Early-Childhood Development Specialist",
+          "address": "2002 Front Range Way, Fort Collins CO 80525",
+          "phone": "+1 (970) 555-0193",
+          "email": "jwsmith@example.com",
+          "linkedin": "linkedin.com/in/jwsmith",
+          "website": "jwsmith.dev"
+        },
+      
+        "careerSummary": "Early-childhood educator and program manager with 12 years’ experience leading multidisciplinary teams, designing evidence-based curricula, and securing > $1 million in grant funding. Passionate about inclusive learning environments.",
+      
+        "education": [
+          {
+            "institution": "University of Arkansas at Little Rock",
+            "location": "Little Rock, AR",
+            "degree": "M.Ed. Early Childhood Education",
+            "year": 2001,
+            "gpa": 3.9,
+            "highlights": [
+              "Dean’s List six consecutive semesters",
+              "Graduate Assistant, Child Development Lab"
+            ]
+          },
+          {
+            "institution": "University of Arkansas at Little Rock",
+            "location": "Little Rock, AR",
+            "degree": "B.S. Early Childhood Development",
+            "year": 1999,
+            "gpa": 3.8
+          }
+        ],
+      
+        "employmentHistory": [
+          {
+            "title": "Program Director",
+            "company": "Rainbow Special Care Center",
+            "location": "Little Rock, AR",
+            "start": "2016-03",
+            "end": "Present",
+            "bullets": [
+              "Oversee daily operations for a 120-child special-needs facility with a staff of 45.",
+              "Launched a STEM-based sensory curriculum adopted by 4 partner schools.",
+              "Reduced staff turnover from 22 % to 9 % via mentorship & quarterly workshops."
+            ]
+          },
+          {
+            "title": "Counseling Supervisor",
+            "company": "The Wesley Center",
+            "location": "Little Rock, AR",
+            "start": "2011-06",
+            "end": "2016-02",
+            "bullets": [
+              "Managed caseloads for 150 adult clients with developmental disabilities.",
+              "Implemented digital record-keeping that cut documentation time by 35 %."
+            ]
+          },
+          {
+            "title": "Client Specialist",
+            "company": "Cowell Elementary School",
+            "location": "Conway, AR",
+            "start": "2005-08",
+            "end": "2011-05",
+            "bullets": [
+              "Co-taught inclusive classrooms (K-5) with focus on adaptive technology.",
+              "Trained 25+ teachers on IEP compliance and differentiated instruction."
+            ]
+          }
+        ],
+      
+        "projects": [
+          {
+            "name": "Inclusive Play Toolkit",
+            "period": "2023",
+            "description": "Open-source library of 50+ sensory-friendly classroom activities, downloaded 12 000 times globally.",
+            "tech": ["Figma", "Canva", "Google Sites"]
+          },
+          {
+            "name": "GrantTrack CRM",
+            "period": "2020",
+            "description": "Custom Airtable/Make.com workflow that tracks grant applications and automates reminders; improved funding hit-rate by 18 %.",
+            "tech": ["Airtable", "Make.com", "Zapier"]
+          }
+        ],
+      
+        "achievements": [
+          "2024 — *NASET Outstanding Program Innovation Award*",
+          "2022 — Secured $450 000 DOE grant for rural early-learning initiatives",
+          "2021 — Speaker at SXSW EDU: \"Designing Sensory-Rich STEM Labs\""
+        ],
+      
+        "skills": [
+          "Curriculum Design", "IEP Compliance", "Team Leadership",
+          "Grant Writing", "ASL (Basic)", "Google Workspace", "Airtable",
+          "Tableau", "First Aid/CPR"
+        ]
+      }
+      
+</script> 
+
+		<script>
+			(async () => {
+				/* ----- load JSON ----- */
+				const holder = document.getElementById("resume-data");
+				let resumeJSON = holder.textContent.trim();
+
+				/* if tag is empty, fetch from data-src */
+				if (!resumeJSON) {
+					const url = holder.getAttribute("data-src");
+					resumeJSON = await fetch(url).then((r) => r.text());
+				}
+				const cv = JSON.parse(resumeJSON);
+
+				/* ----- helper builders ----- */
+				const el = (tag, cls, html) => {
+					const e = document.createElement(tag);
+					if (cls) e.className = cls;
+					if (html) e.innerHTML = html;
+					return e;
+				};
+				const root = document.getElementById("root");
+				const page = el("div", "page");
+				root.append(page);
+
+				/* ===== Header ===== */
+				page.append(el("h1", null, cv.basics.name));
+				page.append(el("div", "meta", cv.basics.headline));
+				const addr = `${cv.basics.address}<br>${cv.basics.phone} • <a href="mailto:${cv.basics.email}">${cv.basics.email}</a>`;
+				page.append(el("div", "meta", addr));
+
+				/* ===== Career Summary ===== */
+				page.append(el("h2", null, "Career Summary"));
+				page.append(el("p", null, cv.careerSummary));
+
+				/* ===== Skills (chips) ===== */
+				page.append(el("h2", null, "Key Skills"));
+				const tagWrap = el("div", "tags");
+				cv.skills.forEach((s) => tagWrap.append(el("span", "tag", s)));
+				page.append(tagWrap);
+
+				/* ===== Achievements ===== */
+				page.append(el("h2", null, "Achievements"));
+				const ulA = el("ul");
+				cv.achievements.forEach((a) => ulA.append(el("li", null, a)));
+				page.append(ulA);
+
+				/* ===== Employment ===== */
+				page.append(el("h2", null, "Employment History"));
+				cv.employmentHistory.forEach((job) => {
+					const wrap = el("div");
+					wrap.append(el("h3", null, `${job.title} – ${job.company}`));
+					wrap.append(
+						el("div", "meta", `${job.start} – ${job.end}  |  ${job.location}`)
+					);
+					const ul = el("ul");
+					job.bullets.forEach((b) => ul.append(el("li", null, b)));
+					wrap.append(ul);
+					page.append(wrap);
+				});
+
+				/* ===== Projects ===== */
+				page.append(el("h2", null, "Selected Projects"));
+				cv.projects.forEach((pr) => {
+					const wrap = el("div");
+					wrap.append(el("h3", null, pr.name));
+					wrap.append(
+						el("div", "meta", `${pr.period} • ${pr.tech.join(", ")}`)
+					);
+					wrap.append(el("p", null, pr.description));
+					page.append(wrap);
+				});
+
+				/* ===== Education ===== */
+				page.append(el("h2", null, "Education"));
+				cv.education.forEach((ed) => {
+					const wrap = el("div");
+					wrap.append(el("h3", null, `${ed.degree}, ${ed.year}`));
+					wrap.append(el("div", "meta", `${ed.institution}, ${ed.location}`));
+					if (ed.highlights) {
+						const ul = el("ul");
+						ed.highlights.forEach((h) => ul.append(el("li", null, h)));
+						wrap.append(ul);
+					}
+					page.append(wrap);
+				});
+			})();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,104 @@
+{
+	"basics": {
+		"name": "Johnathan W. Smith",
+		"headline": "Senior Early-Childhood Development Specialist",
+		"address": "2002 Front Range Way, Fort Collins CO 80525",
+		"phone": "+1 (970) 555-0193",
+		"email": "jwsmith@example.com",
+		"linkedin": "linkedin.com/in/jwsmith",
+		"website": "jwsmith.dev"
+	},
+
+	"careerSummary": "Early-childhood educator and program manager with 12 years’ experience leading multidisciplinary teams, designing evidence-based curricula, and securing > $1 million in grant funding. Passionate about inclusive learning environments.",
+
+	"education": [
+		{
+			"institution": "University of Arkansas at Little Rock",
+			"location": "Little Rock, AR",
+			"degree": "M.Ed. Early Childhood Education",
+			"year": 2001,
+			"gpa": 3.9,
+			"highlights": [
+				"Dean’s List six consecutive semesters",
+				"Graduate Assistant, Child Development Lab"
+			]
+		},
+		{
+			"institution": "University of Arkansas at Little Rock",
+			"location": "Little Rock, AR",
+			"degree": "B.S. Early Childhood Development",
+			"year": 1999,
+			"gpa": 3.8
+		}
+	],
+
+	"employmentHistory": [
+		{
+			"title": "Program Director",
+			"company": "Rainbow Special Care Center",
+			"location": "Little Rock, AR",
+			"start": "2016-03",
+			"end": "Present",
+			"bullets": [
+				"Oversee daily operations for a 120-child special-needs facility with a staff of 45.",
+				"Launched a STEM-based sensory curriculum adopted by 4 partner schools.",
+				"Reduced staff turnover from 22 % to 9 % via mentorship & quarterly workshops."
+			]
+		},
+		{
+			"title": "Counseling Supervisor",
+			"company": "The Wesley Center",
+			"location": "Little Rock, AR",
+			"start": "2011-06",
+			"end": "2016-02",
+			"bullets": [
+				"Managed caseloads for 150 adult clients with developmental disabilities.",
+				"Implemented digital record-keeping that cut documentation time by 35 %."
+			]
+		},
+		{
+			"title": "Client Specialist",
+			"company": "Cowell Elementary School",
+			"location": "Conway, AR",
+			"start": "2005-08",
+			"end": "2011-05",
+			"bullets": [
+				"Co-taught inclusive classrooms (K-5) with focus on adaptive technology.",
+				"Trained 25+ teachers on IEP compliance and differentiated instruction."
+			]
+		}
+	],
+
+	"projects": [
+		{
+			"name": "Inclusive Play Toolkit",
+			"period": "2023",
+			"description": "Open-source library of 50+ sensory-friendly classroom activities, downloaded 12 000 times globally.",
+			"tech": ["Figma", "Canva", "Google Sites"]
+		},
+		{
+			"name": "GrantTrack CRM",
+			"period": "2020",
+			"description": "Custom Airtable/Make.com workflow that tracks grant applications and automates reminders; improved funding hit-rate by 18 %.",
+			"tech": ["Airtable", "Make.com", "Zapier"]
+		}
+	],
+
+	"achievements": [
+		"2024 — *NASET Outstanding Program Innovation Award*",
+		"2022 — Secured $450 000 DOE grant for rural early-learning initiatives",
+		"2021 — Speaker at SXSW EDU: \"Designing Sensory-Rich STEM Labs\""
+	],
+
+	"skills": [
+		"Curriculum Design",
+		"IEP Compliance",
+		"Team Leadership",
+		"Grant Writing",
+		"ASL (Basic)",
+		"Google Workspace",
+		"Airtable",
+		"Tableau",
+		"First Aid/CPR"
+	]
+}
