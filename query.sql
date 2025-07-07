@@ -8,11 +8,16 @@ USE resume_analytics;
 CREATE TABLE IF NOT EXISTS resumes_uploaded (
   resumes_uploaded_id INT PRIMARY KEY AUTO_INCREMENT,
   resume_html LONGTEXT NOT NULL,
+  resume_json JSON NOT NULL,
   resume_name VARCHAR(255) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   uploaded_by VARCHAR(255) NOT NULL
 );
+
+
+-- ALTER TABLE resumes_uploaded
+-- ADD COLUMN resume_json JSON NOT NULL DEFAULT (JSON_OBJECT());
 
 -- Add index for faster queries
 CREATE INDEX idx_resume_name ON resumes_uploaded(resume_name);
@@ -75,3 +80,5 @@ CREATE TABLE resume_click_events (
 );
 
 CREATE INDEX idx_resume_click_events_resume_view_id ON resume_click_events(resume_view_id);
+
+

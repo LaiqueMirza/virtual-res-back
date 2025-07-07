@@ -1,6 +1,6 @@
 const fs = require('fs').promises;
 const { getDB } = require('../config/database');
-const { uploadedByArr, resumeShareLinkExpireDate } = require('../constants/common');
+const { uploadedByArr, resumeShareLinkExpireDate, resumeJson } = require('../constants/common');
 const { convertToHtml } = require('../utils/documentConverter');
 const nodemailer = require("nodemailer");
 
@@ -45,14 +45,24 @@ async function uploadResume(req, res, next) {
     // Convert the document to HTML
     const htmlContent = await convertToHtml(req.file.path);
     
+    let internalResumeJson = resumeJson;
+    internalResumeJson.basics.name = resumeName;
+    internalResumeJson = JSON.stringify(internalResumeJson);
     // Insert into database
     let result;
     try {
       const db = await getDB();
       [result] = await db.execute(
-        "INSERT INTO resumes_uploaded (resume_html, resume_name, created_at, updated_at, uploaded_by) VALUES (?, ?, ?, ?, ?)",
-        [htmlContent, resumeName, createdAt, updatedAt, uploadedBy]
-      );
+				"INSERT INTO resumes_uploaded (resume_json, resume_html, resume_name, created_at, updated_at, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)",
+				[
+          internalResumeJson,
+          htmlContent,
+					resumeName,
+					createdAt,
+					updatedAt,
+					uploadedBy,
+				]
+			);
     } catch (dbError) {
       console.error('Database operation failed:', dbError);
       throw new Error(`Database operation failed: ${dbError.message}`);
