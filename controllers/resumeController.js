@@ -1,7 +1,8 @@
 const fs = require('fs').promises;
 const { getDB } = require('../config/database');
-const { uploadedByArr } = require('../constants/common');
+const { uploadedByArr, resumeShareLinkExpireDate } = require('../constants/common');
 const { convertToHtml } = require('../utils/documentConverter');
+const nodemailer = require("nodemailer");
 
 /**
  * Upload and process a resume file
@@ -128,7 +129,105 @@ async function getResumeList(req, res, next) {
   }
 }
 
+/**
+ * Share resume via email
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+async function shareResumeByEmail(req, res, next) {
+  try {
+		const { emails, resume_template_id } = req.body;
+
+		// Validate request body
+		if (!emails || !Array.isArray(emails) || emails.length === 0) {
+			return res.status(400).json({
+				success: false,
+				message: "At least one email address is required",
+			});
+		}
+
+		if (!resume_template_id) {
+			return res.status(400).json({
+				success: false,
+				message: "Resume template ID is required",
+			});
+		}
+
+		// Get database connection to verify resume exists
+		const db = await getDB();
+		const [resumeResult] = await db.execute(
+			"SELECT resume_name FROM resumes_uploaded WHERE resumes_uploaded_id = ?",
+			[resume_template_id]
+		);
+
+		if (resumeResult.length === 0) {
+			return res.status(404).json({
+				success: false,
+				message: "Resume not found",
+			});
+		}
+
+		// Create share links for each email
+		const shareLinks = await Promise.all(emails.map(async (email) => {
+		  const [result] = await db.execute(
+		    "INSERT INTO resume_share_links (resumes_uploaded_id, email, expires_at) VALUES (?, ?, ?)",
+		    [resume_template_id, email, resumeShareLinkExpireDate]
+		  );
+		  return { email, id: result.insertId };
+		}));
+
+		const resumeName = resumeResult[0].resume_name;
+
+		// Create reusable transporter
+		const transporter = nodemailer.createTransport({
+			host: "smtp.ethereal.email",
+			port: 587,
+			secure: false, // true for 465, false for other ports
+			auth: {
+				user: "carli.hills48@ethereal.email",
+				pass: "YKewzD2T3eez3JVepz",
+			},
+		});
+
+		// Send emails
+		const emailPromises = shareLinks.map(async ({ email, id }) => {
+			const mailOptions = {
+				from: "mirzalaique2ey@gmail.com",
+				to: email,
+				subject: "Resume Share Link",
+				text: `Click the below link to view the resume: http://localhost:3000/view/${id}`,
+				html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="http://localhost:3000/view/${id}">View Resume: ${resumeName}</a></p>`,
+			};
+
+			const info = await transporter.sendMail(mailOptions);
+
+			return {
+				email,
+				messageId: info.messageId,
+				previewUrl: nodemailer.getTestMessageUrl(info),
+			};
+		});
+
+		const emailResults = await Promise.all(emailPromises);
+
+		res.status(200).json({
+			success: true,
+			message: `Resume shared with ${emails.length} recipient(s)`,
+			data: {
+				resumeId: resume_template_id,
+				resumeName,
+				// emailsSent: emailResults,
+			},
+		});
+	} catch (error) {
+    console.error('Error sharing resume by email:', error);
+    next(error);
+  }
+}
+
 module.exports = {
   uploadResume,
-  getResumeList
+  getResumeList,
+  shareResumeByEmail
 };
