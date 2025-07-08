@@ -23,22 +23,30 @@ CREATE TABLE IF NOT EXISTS resumes_uploaded (
 CREATE INDEX idx_resume_name ON resumes_uploaded(resume_name);
 CREATE INDEX idx_uploaded_at ON resumes_uploaded(created_at);
 
-
 CREATE TABLE resume_share_links (
   resume_share_links_id INT PRIMARY KEY AUTO_INCREMENT,
   resumes_uploaded_id INT NOT NULL,
   email VARCHAR(255),                   -- Optional: to whom it was shared
+  client_name VARCHAR(255),                     -- New: name of client the resume was shared with
+  share_type ENUM('email', 'link'),  -- New: how it was shared
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   expires_at DATETIME,                  -- Optional: expiry time
   is_active BOOLEAN DEFAULT TRUE,
-  CONSTRAINT fk_resumes_uploaded_id FOREIGN KEY (resumes_uploaded_id) REFERENCES resumes_uploaded(resumes_uploaded_id)
+  CONSTRAINT fk_resumes_uploaded_id FOREIGN KEY (resumes_uploaded_id)
+    REFERENCES resumes_uploaded(resumes_uploaded_id)
+    ON DELETE CASCADE
 );
+
+
+-- ALTER TABLE resume_share_links
+-- ADD COLUMN client_name VARCHAR(255),
+-- ADD COLUMN share_type ENUM('email', 'link')';
 
 CREATE INDEX idx_resumes_uploaded_id ON resume_share_links(resumes_uploaded_id);
 
 CREATE TABLE resume_views (
-  id INT PRIMARY KEY AUTO_INCREMENT,
+  resume_views_id INT PRIMARY KEY AUTO_INCREMENT,
   resume_share_links_id INT NOT NULL,                          -- FK to share link
   viewer_ip VARCHAR(64),
   user_agent TEXT,
@@ -56,8 +64,8 @@ CREATE INDEX idx_resume_views_resume_share_links_id ON resume_views(resume_share
 
 
 CREATE TABLE resume_view_events (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  resume_view_id INT NOT NULL,
+  resume_view_events_id INT PRIMARY KEY AUTO_INCREMENT,
+  resume_views_id INT NOT NULL,
   section_name VARCHAR(255),           -- e.g., "Education", "Experience"
   time_spent_seconds INT,              -- How long this section was in view
   scroll_depth INT,                    -- Optional: max scroll % reached
@@ -70,8 +78,8 @@ CREATE INDEX idx_resume_view_id ON resume_view_events(resume_view_id);
 
 
 CREATE TABLE resume_click_events (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  resume_view_id INT NOT NULL,
+  resume_click_events_id INT PRIMARY KEY AUTO_INCREMENT,
+  resume_views_id INT NOT NULL,
   element_id VARCHAR(255),          -- e.g., "download-btn"
   element_text VARCHAR(255),        -- e.g., "Download PDF"
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

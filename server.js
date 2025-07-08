@@ -7,7 +7,7 @@ dotenv.config();
 
 // Import routes and database
 const resumeRoutes = require('./routes/resumeRoutes');
-const { connectDB, getDB, isConnected, closeConnection } = require('./config/database');
+const { sequelize } = require('./models');
 
 // Initialize express app
 const app = express();
@@ -41,21 +41,18 @@ app.use((err, req, res, next) => {
 // Initialize the database and start server
 const startServer = async () => {
   try {
-    // Ensure database is connected before starting the server
-    await connectDB();
-    
-    // Verify database connection
-    const connected = await isConnected();
-    if (!connected) {
-      throw new Error('Database connection verification failed');
-    }
-    
-    console.log('Database connection established and verified successfully');
     
     // Start the server
     const PORT = process.env.PORT || 8000;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+    }).on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use`);
+      } else {
+        console.error('Server error:', err);
+      }
+      process.exit(1);
     });
   } catch (error) {
     console.error("Database connection failed:", error);
@@ -69,24 +66,24 @@ startServer();
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
   console.log('SIGINT signal received. Shutting down gracefully...');
-  await closeConnection();
+  await sequelize.close();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('SIGTERM signal received. Shutting down gracefully...');
-  await closeConnection();
+  await sequelize.close();
   process.exit(0);
 });
 
 process.on('uncaughtException', async (error) => {
   console.error('Uncaught Exception:', error);
-  await closeConnection();
+  await sequelize.close();
   process.exit(1);
 });
 
 process.on('unhandledRejection', async (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  await closeConnection();
+  await sequelize.close();
   process.exit(1);
 });
