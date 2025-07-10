@@ -125,106 +125,44 @@ async function getResumeList(req, res, next) {
   }
 }
 
-// /**
-//  * Share resume via email
-//  * @param {Object} req - Express request object
-//  * @param {Object} res - Express response object
-//  * @param {Function} next - Express next middleware function
-//  */
-// async function shareResumeByEmail(req, res, next) {
-//   try {
-//     const { emails, resume_template_id } = req.body;
-
-//     // Validate request body
-//     if (!emails || !Array.isArray(emails) || emails.length === 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "At least one email address is required",
-//       });
-//     }
-
-//     if (!resume_template_id) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Resume template ID is required",
-//       });
-//     }
-
-//     // Find resume using Sequelize
-//     const resume = await commonService.findByPk("resumes_uploaded", resume_template_id);
-
-//     if (!resume) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Resume not found",
-//       });
-//     }
-
-//     // Create reusable transporter
-//     const transporter = nodemailer.createTransport({
-//       host: "smtp.ethereal.email",
-//       port: 587,
-//       secure: false,
-//       auth: {
-//         user: "carli.hills48@ethereal.email",
-//         pass: "YKewzD2T3eez3JVepz",
-//       },
-//     });
-
-//     // Send emails
-//     const emailPromises = emails.map(async (email) => {
-//       const mailOptions = {
-//         from: "mirzalaique2ey@gmail.com",
-//         to: email,
-//         subject: "Resume Share Link",
-//         text: `Click the below link to view the resume: http://localhost:3000/view/${resume.resumes_uploaded_id}`,
-//         html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="http://localhost:3000/view/${resume.resumes_uploaded_id}">View Resume: ${resume.resume_name}</a></p>`,
-//       };
-
-//       const info = await transporter.sendMail(mailOptions);
-
-//       return {
-//         email,
-//         messageId: info.messageId,
-//         previewUrl: nodemailer.getTestMessageUrl(info),
-//       };
-//     });
-
-//     await Promise.all(emailPromises);
-
-//     res.status(200).json({
-//       success: true,
-//       message: `Resume shared with ${emails.length} recipient(s)`,
-//       data: {
-//         resumeId: resume.resumes_uploaded_id,
-//         resumeName: resume.resume_name,
-//       },
-//     });
-//   } catch (error) {
-//     console.error('Error sharing resume by email:', error);
-//     next(error);
-//   }
-// }
-
 /**
- * Get resume preview for client
+ * Get resume preview for client and track the view
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next middleware function
  */
 async function getClientPreview(req, res, next) {
   try {
-    const { id } = req.query;
+    const { resume_share_links_id, viewer_ip, location_city, location_country } = req.body;
 
-    if (!id) {
+    if (!resume_share_links_id) {
       return res.status(400).json({
         success: false,
-        message: "Resume ID is required"
+        message: "Resume share link ID is required"
       });
     }
 
-    // Find resume using Sequelize
-    const resume = await commonService.findByPk("resumes_uploaded", id);
+    // Find valid share link using Sequelize
+    const shareLink = await commonService.findOne("resume_share_links", {
+      resume_share_links_id,
+      is_active: true,
+      expires_at: {
+        [db.Sequelize.Op.or]: [
+          { [db.Sequelize.Op.gt]: new Date() },
+          { [db.Sequelize.Op.eq]: null }
+        ]
+      }
+    });
+
+    if (!shareLink) {
+      return res.status(404).json({
+        success: false,
+        message: "Share link not found or expired"
+      });
+    }
+
+    // Get associated resume
+    const resume = await commonService.findByPk("resumes_uploaded", shareLink.resumes_uploaded_id);
 
     if (!resume) {
       return res.status(404).json({
@@ -233,11 +171,19 @@ async function getClientPreview(req, res, next) {
       });
     }
 
-    // Return the resume content
+    // Insert view data into resume_views table
+    await commonService.create("resume_views", {
+      resume_share_links_id,
+      viewer_ip,
+      location_city,
+      location_country,
+    });
+
     res.status(200).json({
       success: true,
-      content: resume.resume_html,
-      resumeName: resume.resume_name
+      data: {
+        resume_json: resume.resume_json
+      }
     });
   } catch (error) {
     console.error('Error getting client preview:', error);
@@ -248,6 +194,5 @@ async function getClientPreview(req, res, next) {
 module.exports = {
   uploadResume,
   getResumeList,
-  shareResumeByEmail,
   getClientPreview
 };

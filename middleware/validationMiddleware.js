@@ -1,0 +1,74 @@
+const Joi = require('joi');
+
+// Validation schemas
+const schemas = {
+	// Schema for resume preview
+	resumePreview: Joi.object({
+		resume_share_links_id: Joi.string().required().messages({
+			"string.empty": "Resume share link ID is required",
+			"any.required": "Resume share link ID is required",
+		}),
+		viewer_ip: Joi.string().allow(null, ""),
+		location_city: Joi.string().allow(null, ""),
+		location_country: Joi.string().allow(null, ""),
+	}),
+
+	// Schema for resume upload
+	resumeUpload: Joi.object({
+		resumeName: Joi.string().required().messages({
+			"string.empty": "Resume name is required",
+			"any.required": "Resume name is required",
+		}),
+	}),
+
+	// Schema for sharing resume by email
+	shareByEmail: Joi.object({
+		resumes_uploaded_id: Joi.number().required().messages({
+			"number.base": "resumes_uploaded_id must be a number",
+			"any.required": "resumes_uploaded_id is required",
+		}),
+		emails: Joi.array().required().messages({
+			"array.base": "Emails must be an array",
+			"any.required": "Recipient emails is required",
+		}),
+		// senderName: Joi.string().required().messages({
+		// 	"string.empty": "Sender name is required",
+		// 	"any.required": "Sender name is required",
+		// }),
+	}),
+
+	// Schema for generating share link
+	generateShareLink: Joi.object({
+		resumes_uploaded_id: Joi.number().required().messages({
+			"number.base": "resumes_uploaded_id must be a number",
+			"any.required": "resumes_uploaded_id is required",
+		}),
+		client_name: Joi.string().required().messages({
+			"string.empty": "client_name is required",
+			"any.required": "client_name is required",
+		}),
+	}),
+};
+
+// Middleware factory for validation
+const validateRequest = (schema) => {
+  return (req, res, next) => {
+    const { error } = schema.validate(req.body, { abortEarly: false });
+    
+    if (error) {
+      const errorMessages = error.details.map(detail => detail.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: errorMessages
+      });
+    }
+    
+    next();
+  };
+};
+
+module.exports = {
+  validateRequest,
+  schemas
+};
