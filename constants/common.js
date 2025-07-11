@@ -72,6 +72,31 @@ exports.resumeJson = {
 				"Trained 25+ teachers on IEP compliance and differentiated instruction.",
 			],
 		},
+		{
+			title: "Client Expert",
+			company: "Google",
+			location: "New York, NY",
+			start: "2002-08",
+			end: "2005-07",
+			bullets: [
+				"Launched a STEM-based sensory curriculum adopted by 4 partner schools.",
+				"Trained 25+ teachers on IEP compliance and differentiated instruction.",
+				"Oversaw daily operations for a 120-child special-needs facility with a staff of 45.",
+				"Co-taught inclusive classrooms (K-5) with focus on adaptive technology.",
+			],
+		},
+		{
+			title: "Early Education Intern",
+			company: "Little Steps Academy",
+			location: "Fayetteville, AR",
+			start: "2000-06",
+			end: "2002-07",
+			bullets: [
+				"Assisted lead educators in developing weekly lesson plans.",
+				"Supported parent-teacher conferences and individualized child assessments.",
+				"Piloted a music therapy program for preschoolers.",
+			],
+		},
 	],
 
 	projects: [
@@ -89,12 +114,28 @@ exports.resumeJson = {
 				"Custom Airtable/Make.com workflow that tracks grant applications and automates reminders; improved funding hit-rate by 18 %.",
 			tech: ["Airtable", "Make.com", "Zapier"],
 		},
+		{
+			name: "IEP Wizard",
+			period: "2018",
+			description:
+				"Built a toolkit for simplifying IEP documentation, now used in 30+ schools.",
+			tech: ["Google Sheets", "Apps Script"],
+		},
+		{
+			name: "Sensory Garden Initiative",
+			period: "2017",
+			description:
+				"Designed outdoor sensory garden kits in collaboration with local schools.",
+			tech: ["SketchUp", "Trello", "Google Docs"],
+		},
 	],
 
 	achievements: [
 		"2024 — *NASET Outstanding Program Innovation Award*",
 		"2022 — Secured $450 000 DOE grant for rural early-learning initiatives",
 		'2021 — Speaker at SXSW EDU: "Designing Sensory-Rich STEM Labs"',
+		'2019 — Published in *Journal of Early Childhood Research*: "Adaptive STEM Tools for Pre-K"',
+		"2018 — Developed a statewide teacher training module on autism inclusion practices",
 	],
 
 	skills: [
@@ -107,6 +148,13 @@ exports.resumeJson = {
 		"Airtable",
 		"Tableau",
 		"First Aid/CPR",
+		"Public Speaking",
+		"Behavioral Assessment",
+		"Conflict Resolution",
+		"Screencasting & Training",
+		"Child Psychology",
+		"Workshop Facilitation",
 	],
 };
+
 

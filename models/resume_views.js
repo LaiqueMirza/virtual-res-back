@@ -12,12 +12,20 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				allowNull: false,
 				references: {
-					model: 'resume_share_links',
-					key: 'resume_share_links_id'
-				}
+					model: "resume_share_links",
+					key: "resume_share_links_id",
+				},
 			},
 			viewer_ip: {
 				type: DataTypes.STRING(64),
+				allowNull: true,
+			},
+			device_type: {
+				type: DataTypes.STRING(128),
+				allowNull: true,
+			},
+			browser_info: {
+				type: DataTypes.STRING(128),
 				allowNull: true,
 			},
 			user_agent: {
@@ -56,10 +64,10 @@ module.exports = (sequelize, DataTypes) => {
 			underscored: true,
 			indexes: [
 				{
-					name: 'idx_resume_views_resume_share_links_id',
-					fields: ['resume_share_links_id']
-				}
-			]
+					name: "idx_resume_views_resume_share_links_id",
+					fields: ["resume_share_links_id"],
+				},
+			],
 		}
 	);
 };

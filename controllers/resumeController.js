@@ -133,8 +133,8 @@ async function getResumeList(req, res, next) {
  */
 async function getClientPreview(req, res, next) {
   try {
-    const { resume_share_links_id, viewer_ip, location_city, location_country } = req.body;
-
+    const { resume_share_links_id, viewer_ip, device_type, browser_info, location_city, location_country } = req.body;
+    
     if (!resume_share_links_id) {
       return res.status(400).json({
         success: false,
@@ -174,7 +174,7 @@ async function getClientPreview(req, res, next) {
     // Insert view data into resume_views table
     await commonService.create("resume_views", {
       resume_share_links_id,
-      viewer_ip,
+      viewer_ip,device_type, browser_info,
       location_city,
       location_country,
     });

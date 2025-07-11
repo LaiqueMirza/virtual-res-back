@@ -9,6 +9,8 @@ const schemas = {
 			"any.required": "Resume share link ID is required",
 		}),
 		viewer_ip: Joi.string().allow(null, ""),
+		device_type: Joi.string().allow(null, ""),
+		browser_info: Joi.string().allow(null, ""),
 		location_city: Joi.string().allow(null, ""),
 		location_country: Joi.string().allow(null, ""),
 	}),
