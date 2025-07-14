@@ -89,9 +89,9 @@ async function uploadResume(req, res, next) {
  */
 async function getResumeList(req, res, next) {
   try {
-    // Get page number from query params, default to 1 if not provided
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10; // 10 records per page
+    // Get page number from request body, default to 1 if not provided
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10; // 10 records per page by default
     const offset = (page - 1) * limit;
     
     // Get resumes with pagination using Sequelize

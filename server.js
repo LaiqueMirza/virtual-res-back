@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/v1/resume', resumeRoutes);
 
 // Default route
-app.get('/', (req, res) => {
+app.post('/', (req, res) => {
   res.send('Resume Upload API is running');
 });
 
