@@ -71,8 +71,8 @@ async function shareResumeByEmail(req, res, next) {
 				from: "mirzalaique2ey@gmail.com",
 				to: shareLink.email,
 				subject: "Resume Share Link",
-				text: `Click the below link to view the resume: http://localhost:3000/view/${shareLink.resume_share_links_id}`,
-				html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="http://localhost:3000/view/${shareLink.resume_share_links_id}">View Resume: ${resume.resume_name}</a></p>`,
+				text: `Click the below link to view the resume: ${process.env.FRONTEND_URL}/view/${shareLink.resume_share_links_id}`,
+				html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="${process.env.FRONTEND_URL}/view/${shareLink.resume_share_links_id}">View Resume: ${resume.resume_name}</a></p>`,
 			};
 
 			const info = await transporter.sendMail(mailOptions);
