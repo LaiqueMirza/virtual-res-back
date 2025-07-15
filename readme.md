@@ -192,6 +192,26 @@ POST /v1/resume/preview
 }
 ```
 
+### Update Scroll Percentage
+
+```
+POST /v1/resume/update-scroll
+```
+
+**Request:**
+- Content-Type: application/json
+- Body:
+  - resume_views_id: Number (required)
+  - scroll_percentage: Number (required, integer between 0-100)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Scroll percentage updated successfully"
+}
+```
+
 ## Database Schema
 
 The application uses a MySQL database with the following table structure (automatically created on startup):

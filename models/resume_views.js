@@ -52,6 +52,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				allowNull: true,
 			},
+			scroll_percentage: {
+				type: DataTypes.INTEGER,
+				allowNull: true,
+			},
 		},
 		{
 			timestamps: true,

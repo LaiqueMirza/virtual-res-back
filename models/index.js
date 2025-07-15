@@ -60,9 +60,9 @@ Object.keys(db).forEach((modelName) => {
 
 require('../config/model_joins')(db);
 
-db.sequelize.sync({ force: true }).then(() => {
-	console.log("yes re-sync done!");
-});
+// db.sequelize.sync({ force: true }).then(() => {
+// 	console.log("yes re-sync done!");
+// });
 
 
 module.exports = db;

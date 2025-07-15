@@ -12,9 +12,17 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				allowNull: false,
 				references: {
-					model: 'resume_views',
-					key: 'resume_views_id'
-				}
+					model: "resume_views",
+					key: "resume_views_id",
+				},
+			},
+			resume_share_links_id: {
+				type: DataTypes.INTEGER,
+				allowNull: false,
+				references: {
+					model: "resume_share_links",
+					key: "resume_share_links_id",
+				},
 			},
 			section_name: {
 				type: DataTypes.STRING(255),
@@ -40,10 +48,10 @@ module.exports = (sequelize, DataTypes) => {
 			underscored: true,
 			indexes: [
 				{
-					name: 'idx_resume_view_id',
-					fields: ['resume_views_id']
-				}
-			]
+					name: "idx_resume_view_id",
+					fields: ["resume_views_id"],
+				},
+			],
 		}
 	);
 };

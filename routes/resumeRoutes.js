@@ -28,4 +28,11 @@ router.post(
 	resumeController.getClientPreview
 );
 
+// POST /v1/resume/update-scroll - Update scroll percentage for a resume view
+router.post(
+	"/update-scroll",
+	validateRequest(schemas.updateScrollPercentage),
+	resumeController.updateScrollPercentage
+);
+
 module.exports = router;

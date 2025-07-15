@@ -191,8 +191,53 @@ async function getClientPreview(req, res, next) {
   }
 }
 
+/**
+ * Update scroll percentage for a resume view
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+async function updateScrollPercentage(req, res, next) {
+  try {
+    const { resume_views_id, scroll_percentage } = req.body;
+    
+    if (!resume_views_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume view ID is required"
+      });
+    }
+
+    // Find the resume view record
+    const resumeView = await commonService.findByPk("resume_views", resume_views_id);
+
+    if (!resumeView) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume view record not found"
+      });
+    }
+
+    // Update the scroll percentage
+    await commonService.update("resume_views", {
+      scroll_percentage
+    }, {
+      resume_views_id
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Scroll percentage updated successfully"
+    });
+  } catch (error) {
+    console.error('Error updating scroll percentage:', error);
+    next(error);
+  }
+}
+
 module.exports = {
   uploadResume,
   getResumeList,
-  getClientPreview
+  getClientPreview,
+  updateScrollPercentage
 };

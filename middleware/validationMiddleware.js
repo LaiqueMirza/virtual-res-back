@@ -50,6 +50,21 @@ const schemas = {
 			"any.required": "client_name is required",
 		}),
 	}),
+
+	// Schema for updating scroll percentage
+	updateScrollPercentage: Joi.object({
+		resume_views_id: Joi.number().required().messages({
+			"number.base": "Resume view ID must be a number",
+			"any.required": "Resume view ID is required",
+		}),
+		scroll_percentage: Joi.number().integer().min(0).max(100).required().messages({
+			"number.base": "Scroll percentage must be a number",
+			"number.integer": "Scroll percentage must be an integer",
+			"number.min": "Scroll percentage must be at least 0",
+			"number.max": "Scroll percentage cannot exceed 100",
+			"any.required": "Scroll percentage is required",
+		}),
+	}),
 };
 
 // Middleware factory for validation
