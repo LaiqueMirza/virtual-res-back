@@ -28,12 +28,16 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.STRING(255),
 				allowNull: true,
 			},
-			time_spent_seconds: {
+			breaks_taken: {
 				type: DataTypes.INTEGER,
+				defaultValue: 0,
+			},
+			total_time_spent: {
+				type: DataTypes.TIME,
 				allowNull: true,
 			},
-			scroll_depth: {
-				type: DataTypes.INTEGER,
+			view_end_time: {
+				type: DataTypes.DATE,
 				allowNull: true,
 			},
 		},

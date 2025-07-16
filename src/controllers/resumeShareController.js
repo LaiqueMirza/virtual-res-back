@@ -1,7 +1,7 @@
-const { resumeShareLinkExpireDate } = require('../constants/common');
+const { resumeShareLinkExpireDate } = require('../../constants/common');
 const nodemailer = require('nodemailer');
 const commonService = require('../services/common');
-const db = require('../models');
+const db = require('../../models');
 
 /**
  * Share resume via email
@@ -67,12 +67,15 @@ async function shareResumeByEmail(req, res, next) {
 
 		// Send emails
 		const emailPromises = shareLinks.map(async (shareLink) => {
+			// Encode the resume_share_links_id with base64
+			const encodedId = Buffer.from(shareLink.resume_share_links_id.toString()).toString('base64');
+			
 			const mailOptions = {
 				from: "mirzalaique2ey@gmail.com",
 				to: shareLink.email,
 				subject: "Resume Share Link",
-				text: `Click the below link to view the resume: ${process.env.FRONTEND_URL}/view/${shareLink.resume_share_links_id}`,
-				html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="${process.env.FRONTEND_URL}/view/${shareLink.resume_share_links_id}">View Resume: ${resume.resume_name}</a></p>`,
+				text: `Click the below link to view the resume: ${process.env.FRONTEND_URL}/view/${encodedId}`,
+				html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="${process.env.FRONTEND_URL}/view/${encodedId}">View Resume: ${resume.resume_name}</a></p>`,
 			};
 
 			const info = await transporter.sendMail(mailOptions);
@@ -147,14 +150,18 @@ async function generateShareLink(req, res, next) {
 			is_active: true,
 		});
 
+		// Encode the resume_share_links_id with base64
+		const encodedId = Buffer.from(shareLink.resume_share_links_id.toString()).toString('base64');
+		
 		res.status(200).json({
 			success: true,
 			message: "Share link generated successfully",
 			data: {
-				share_link_id: shareLink.resume_share_links_id,
+				share_link_id: encodedId,
 				expires_at: shareLink.expires_at,
 			},
 		});
+
 	} catch (error) {
 		console.error("Error generating share link:", error);
 		next(error);

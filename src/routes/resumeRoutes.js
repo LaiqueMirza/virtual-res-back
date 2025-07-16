@@ -18,21 +18,25 @@ router.post("/share/email", validateRequest(schemas.shareByEmail), resumeShareCo
 router.post("/share/link", validateRequest(schemas.generateShareLink), resumeShareController.generateShareLink);
 
 // POST /v1/resume/preview - Get resume preview for client and track view
-// router.post(
-// 	"/preview",
-// 	validateRequest(schemas.resumePreview),
-// 	resumeController.getClientPreview
-// );
 router.post(
 	"/preview",
+	validateRequest(schemas.resumePreview),
 	resumeController.getClientPreview
 );
+
 
 // POST /v1/resume/update-scroll - Update scroll percentage for a resume view
 router.post(
 	"/update-scroll",
 	validateRequest(schemas.updateScrollPercentage),
 	resumeController.updateScrollPercentage
+);
+
+// POST /v1/resume/track-event - Track resume view events
+router.post(
+	"/track-event",
+	validateRequest(schemas.trackResumeEvent),
+	resumeController.trackResumeEvent
 );
 
 module.exports = router;

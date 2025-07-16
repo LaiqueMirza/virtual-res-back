@@ -67,7 +67,7 @@ CREATE TABLE resume_view_events (
   resume_view_events_id INT PRIMARY KEY AUTO_INCREMENT,
   resume_views_id INT NOT NULL,
   section_name VARCHAR(255),           -- e.g., "Education", "Experience"
-  time_spent_seconds INT,              -- How long this section was in view
+  total_time_spent_seconds INT,              -- How long this section was in view
   scroll_depth INT,                    -- Optional: max scroll % reached
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,

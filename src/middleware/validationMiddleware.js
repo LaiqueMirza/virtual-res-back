@@ -13,6 +13,22 @@ const schemas = {
 		browser_info: Joi.string().allow(null, ""),
 		location_city: Joi.string().allow(null, ""),
 		location_country: Joi.string().allow(null, ""),
+		resume_views_id: Joi.number().allow(null, 0)
+	}),
+
+	// Schema for tracking resume view events
+	trackResumeEvent: Joi.object({
+		resume_views_id: Joi.number().required().messages({
+			"number.base": "Resume view ID must be a number",
+			"any.required": "Resume view ID is required",
+		}),
+		resume_share_links_id: Joi.number().required().messages({
+			"number.base": "Resume share link ID must be a number",
+			"any.required": "Resume share link ID is required",
+		}),
+		section_name: Joi.string().allow(null, ""),
+		total_time_spent: Joi.number().allow(null, 0),
+		view_end_time: Joi.date().allow(null),
 	}),
 
 	// Schema for resume upload
@@ -57,13 +73,18 @@ const schemas = {
 			"number.base": "Resume view ID must be a number",
 			"any.required": "Resume view ID is required",
 		}),
-		scroll_percentage: Joi.number().integer().min(0).max(100).required().messages({
-			"number.base": "Scroll percentage must be a number",
-			"number.integer": "Scroll percentage must be an integer",
-			"number.min": "Scroll percentage must be at least 0",
-			"number.max": "Scroll percentage cannot exceed 100",
-			"any.required": "Scroll percentage is required",
-		}),
+		scroll_percentage: Joi.number()
+			.integer()
+			.min(0)
+			.max(100)
+			.required()
+			.messages({
+				"number.base": "Scroll percentage must be a number",
+				"number.integer": "Scroll percentage must be an integer",
+				"number.min": "Scroll percentage must be at least 0",
+				"number.max": "Scroll percentage cannot exceed 100",
+				"any.required": "Scroll percentage is required",
+			}),
 	}),
 };
 

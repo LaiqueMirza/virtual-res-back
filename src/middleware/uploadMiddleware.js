@@ -2,19 +2,21 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// // Create uploads directory if it doesn't exist
-// const uploadDir = path.join(__dirname, '..', process.env.UPLOAD_DIR || 'uploads');
-// if (!fs.existsSync(uploadDir)) {
-//   fs.mkdirSync(uploadDir, { recursive: true });
-// }
+// Create uploads directory if it doesn't exist
+const uploadDir = path.join(__dirname, '../..', 'resume_uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Configure storage
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		cb(null, './resume_uploads');
+		cb(null, uploadDir);
 	},
 	filename: function (req, file, cb) {
-		const uniqueSuffix = Date.now() + "-" + file.originalname;
+		// Sanitize filename to remove special characters
+		const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
+		const uniqueSuffix = Date.now() + "-" + sanitizedName;
 		cb(null, uniqueSuffix);
 	},
 });

@@ -212,6 +212,32 @@ POST /v1/resume/update-scroll
 }
 ```
 
+### Track Resume View Event
+
+```
+POST /v1/resume/track-event
+```
+
+**Request:**
+- Content-Type: application/json
+- Body:
+  - resume_views_id: Number (required)
+  - resume_share_links_id: Number (required)
+  - section_name: String (optional)
+  - total_time_spent: String (optional, format: HH:MM:SS)
+  - view_end_time: Date (optional, ISO format)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Resume view event tracked successfully",
+  "data": {
+    "resume_view_events_id": 1
+  }
+}
+```
+
 ## Database Schema
 
 The application uses a MySQL database with the following table structure (automatically created on startup):

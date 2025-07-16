@@ -1,9 +1,10 @@
 const fs = require('fs').promises;
-const { uploadedByArr, resumeShareLinkExpireDate, resumeJson } = require('../constants/common');
-const db = require('../models');
+const { uploadedByArr, resumeShareLinkExpireDate, resumeJson } = require('../../constants/common');
+const db = require('../../models');
 const { convertToHtml } = require('../utils/documentConverter');
 const nodemailer = require('nodemailer');
 const commonService = require('../services/common');
+const { convertTimeToSeconds, convertSecondsToTime } = require('../utils/helperFun');
 
 /**
  * Upload and process a resume file
@@ -133,7 +134,7 @@ async function getResumeList(req, res, next) {
  */
 async function getClientPreview(req, res, next) {
   try {
-    const { resume_share_links_id, viewer_ip, device_type, browser_info, location_city, location_country } = req.body;
+    const { resume_share_links_id, viewer_ip, device_type, browser_info, location_city, location_country, resume_views_id } = req.body;
     
     if (!resume_share_links_id) {
       return res.status(400).json({
@@ -170,21 +171,37 @@ async function getClientPreview(req, res, next) {
         message: "Resume not found"
       });
     }
-
-    // Insert view data into resume_views table
-    await commonService.create("resume_views", {
-      resume_share_links_id,
-      viewer_ip,device_type, browser_info,
-      location_city,
-      location_country,
-    });
+    let resumeView;
+    if (resume_views_id) {
+      // update resume_views table
+      await commonService.update("resume_views", {
+        viewer_ip,
+        device_type,
+        browser_info,
+        location_city,
+        location_country,
+      }, {
+        resume_views_id
+      });
+    } else {
+			// Insert view data into resume_views table
+			resumeView = await commonService.create("resume_views", {
+				resume_share_links_id,
+				viewer_ip,
+				device_type,
+				browser_info,
+				location_city,
+				location_country,
+			});
+		}
 
     res.status(200).json({
-      success: true,
-      data: {
-        resume_json: resume.resume_json
-      }
-    });
+			success: true,
+			data: {
+				resume_json: resume.resume_json,
+				resume_views_id: resume_views_id || resumeView?.resume_views_id,
+			},
+		});
   } catch (error) {
     console.error('Error getting client preview:', error);
     next(error);
@@ -235,9 +252,95 @@ async function updateScrollPercentage(req, res, next) {
   }
 }
 
+/**
+ * Track resume view events
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+async function trackResumeEvent(req, res, next) {
+  try {
+    const { resume_views_id, resume_share_links_id, section_name, total_time_spent, view_end_time } = req.body;
+    
+    if (!resume_views_id || !resume_share_links_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume view ID and resume share link ID are required"
+      });
+    }
+
+    // Check if a record with the same resume_views_id, resume_share_links_id, and section_name exists
+    const existingEvent = await commonService.findOne("resume_view_events", {
+      resume_views_id,
+      resume_share_links_id,
+      section_name
+    });
+
+    let resumeViewEvent;
+
+    if (existingEvent) {
+      // Update the existing record
+      // Increment breaks_taken by 1
+      const updatedBreaksTaken = (existingEvent.breaks_taken || 0) + 1;
+      
+      // Add current total_time_spent to the previous total_time_spent
+      // Since total_time_spent is stored as TIME type, we need to handle it appropriately
+      let updatedTotalTimeSpent = total_time_spent;
+      
+      if (existingEvent.total_time_spent && total_time_spent) {
+        const existingSeconds = convertTimeToSeconds(existingEvent.total_time_spent);
+        const newSeconds = convertTimeToSeconds(total_time_spent);
+        const totalSeconds = existingSeconds + newSeconds;
+        
+        updatedTotalTimeSpent = convertSecondsToTime(totalSeconds);
+      }
+      
+      await commonService.update("resume_view_events", {
+        breaks_taken: updatedBreaksTaken,
+        total_time_spent: updatedTotalTimeSpent,
+        view_end_time: view_end_time
+      }, {
+        resume_view_events_id: existingEvent.resume_view_events_id
+      });
+      
+      resumeViewEvent = await commonService.findByPk("resume_view_events", existingEvent.resume_view_events_id);
+    } else {
+      // Create a new resume view event record
+      resumeViewEvent = await commonService.create("resume_view_events", {
+        resume_views_id,
+        resume_share_links_id,
+        section_name,
+        total_time_spent: convertTimeToSeconds(total_time_spent),
+        view_end_time
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Resume view event tracked successfully",
+      data: {
+        resume_view_events_id: resumeViewEvent.resume_view_events_id
+      }
+    });
+  } catch (error) {
+    console.error('Error tracking resume event:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
+    next(error);
+  }
+}
+
 module.exports = {
-  uploadResume,
-  getResumeList,
-  getClientPreview,
-  updateScrollPercentage
+	uploadResume,
+	getResumeList,
+	getClientPreview,
+	updateScrollPercentage,
+	trackResumeEvent,
 };

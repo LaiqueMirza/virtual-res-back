@@ -44,12 +44,12 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: true,
 			},
-			ended_at: {
-				type: DataTypes.DATE,
+			total_time_spent: {
+				type: DataTypes.TIME,
 				allowNull: true,
 			},
-			total_duration_seconds: {
-				type: DataTypes.INTEGER,
+			view_end_time: {
+				type: DataTypes.DATE,
 				allowNull: true,
 			},
 			scroll_percentage: {
