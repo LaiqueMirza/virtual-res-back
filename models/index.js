@@ -21,17 +21,38 @@ const sequelize = new Sequelize(
 			idle: 10000,
 		},
 		logging: false, // Set to console.log to see SQL queries
+		retry: {
+			max: 5, // Maximum retry attempts
+			match: [/Deadlock/i, /ETIMEDOUT/, /ECONNREFUSED/, /SequelizeConnectionError/], // Retry on these errors
+			backoffBase: 1000, // Initial backoff duration in ms
+			backoffExponent: 1.5, // Exponential backoff factor
+		},
 	}
 );
 
-sequelize
-	.authenticate()
-	.then(() => {
-		console.log("Database connected..");
-	})
-	.catch((err) => {
-		console.log("Error" + err);
-	});
+// Function to handle database connection with retry logic
+const connectWithRetry = async (maxRetries = 5, delay = 5000) => {
+	let retries = 0;
+	while (retries < maxRetries) {
+		try {
+			await sequelize.authenticate();
+			console.log("Database connected..");
+			return true;
+		} catch (err) {
+			retries++;
+			console.log(`Connection attempt ${retries} failed: ${err.message}`);
+			if (retries >= maxRetries) {
+				console.log("Max retries reached. Operating in offline mode.");
+				return false;
+			}
+			console.log(`Retrying in ${delay}ms...`);
+			await new Promise(resolve => setTimeout(resolve, delay));
+		}
+	}
+};
+
+// Initial connection
+connectWithRetry();
 
 const db = {};
 

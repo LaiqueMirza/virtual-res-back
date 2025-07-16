@@ -6,7 +6,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Import routes and database
-const resumeRoutes = require('./routes/resumeRoutes');
+const resumeRoutes = require('./src/routes/resumeRoutes');
 const { sequelize } = require('./models');
 
 // Initialize express app
@@ -19,6 +19,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from resume_uploads directory
+app.use('/resume_uploads', express.static('resume_uploads'));
 
 // Routes
 app.use('/v1/resume', resumeRoutes);
@@ -40,24 +43,18 @@ app.use((err, req, res, next) => {
 
 // Initialize the database and start server
 const startServer = async () => {
-  try {
-    
-    // Start the server
-    const PORT = process.env.PORT || 8000;
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    }).on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use`);
-      } else {
-        console.error('Server error:', err);
-      }
-      process.exit(1);
-    });
-  } catch (error) {
-    console.error("Database connection failed:", error);
+  // Start the server regardless of database connection status
+  const PORT = process.env.PORT || 8000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use`);
+    } else {
+      console.error('Server error:', err);
+    }
     process.exit(1);
-  }
+  });
 };
 
 // Start the server
