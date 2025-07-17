@@ -13,6 +13,10 @@ const schemas = {
 		browser_info: Joi.string().allow(null, ""),
 		location_city: Joi.string().allow(null, ""),
 		location_country: Joi.string().allow(null, ""),
+		referrer_url: Joi.string().required().messages({
+			"string.empty": "Referrer URL is required",
+			"any.required": "Referrer URL is required",
+		}),
 		resume_views_id: Joi.number().allow(null, 0)
 	}),
 
@@ -85,6 +89,36 @@ const schemas = {
 				"number.max": "Scroll percentage cannot exceed 100",
 				"any.required": "Scroll percentage is required",
 			}),
+	}),
+
+	// Schema for updating view time information
+	updateViewTimeInfo: Joi.object({
+		resume_views_id: Joi.number().required().messages({
+			"number.base": "Resume view ID must be a number",
+			"any.required": "Resume view ID is required",
+		}),
+		total_time_spent: Joi.number().required().messages({
+			"number.base": "Total time spent must be a number",
+			"any.required": "Total time spent is required",
+		}),
+		view_end_time: Joi.date().messages({
+			"date.base": "View end time must be a valid date",
+		}),
+	}),
+
+	// Schema for tracking click events
+	trackClickEvent: Joi.object({
+		resume_views_id: Joi.number().required().messages({
+			"number.base": "Resume view ID must be a number",
+			"any.required": "Resume view ID is required",
+		}),
+		resume_share_links_id: Joi.number().required().messages({
+			"number.base": "Resume share link ID must be a number",
+			"any.required": "Resume share link ID is required",
+		}),
+		section_name: Joi.string().allow(null, ""),
+		link: Joi.string().allow(null, ""),
+		element_text: Joi.string().allow(null, ""),
 	}),
 };
 

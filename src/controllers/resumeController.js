@@ -134,7 +134,7 @@ async function getResumeList(req, res, next) {
  */
 async function getClientPreview(req, res, next) {
   try {
-    const { resume_share_links_id, viewer_ip, device_type, browser_info, location_city, location_country, resume_views_id } = req.body;
+    const { resume_share_links_id, viewer_ip, device_type, browser_info, location_city, location_country, resume_views_id, referrer_url } = req.body;
     
     if (!resume_share_links_id) {
       return res.status(400).json({
@@ -180,6 +180,7 @@ async function getClientPreview(req, res, next) {
         browser_info,
         location_city,
         location_country,
+        referrer_url,
       }, {
         resume_views_id
       });
@@ -192,6 +193,7 @@ async function getClientPreview(req, res, next) {
 				browser_info,
 				location_city,
 				location_country,
+				referrer_url,
 			});
 		}
 
@@ -314,7 +316,6 @@ async function trackResumeEvent(req, res, next) {
         view_end_time
       });
     }
-
     res.status(200).json({
       success: true,
       message: "Resume view event tracked successfully",
@@ -337,10 +338,125 @@ async function trackResumeEvent(req, res, next) {
   }
 }
 
+/**
+ * Update total time spent and view end time for a resume view
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+async function updateViewTimeInfo(req, res, next) {
+  try {
+    const { resume_views_id, total_time_spent, view_end_time } = req.body;
+    console.log("updateViewTimeInfo: ", resume_views_id, total_time_spent, view_end_time)
+    if (!resume_views_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume view ID is required"
+      });
+    }
+
+    // Find the resume view record
+    const resumeView = await commonService.findByPk("resume_views", resume_views_id);
+
+    if (!resumeView) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume view record not found"
+      });
+    }
+
+    // Calculate updated total_time_spent if it already exists
+    let updatedTotalTimeSpent = total_time_spent;
+    
+    if (resumeView.total_time_spent && total_time_spent) {
+      const existingSeconds = convertTimeToSeconds(resumeView.total_time_spent);
+      const newSeconds = convertTimeToSeconds(total_time_spent);
+      const totalSeconds = existingSeconds + newSeconds;
+      
+      updatedTotalTimeSpent = convertSecondsToTime(totalSeconds);
+    }
+
+    // Update the total_time_spent and view_end_time
+    await commonService.update("resume_views", {
+      total_time_spent: updatedTotalTimeSpent,
+      view_end_time: view_end_time
+    }, {
+      resume_views_id
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "View time information updated successfully"
+    });
+  } catch (error) {
+    console.error('Error updating view time information:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
+    next(error);
+  }
+}
+
+/**
+ * Track resume click events
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+async function trackClickEvent(req, res, next) {
+  try {
+    const { resume_views_id, resume_share_links_id, section_name, link, element_text } = req.body;
+    
+    if (!resume_views_id || !resume_share_links_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume view ID and resume share link ID are required"
+      });
+    }
+
+    // Create a new click event record
+    const clickEvent = await commonService.create("resume_click_events", {
+      resume_views_id,
+      resume_share_links_id,
+      section_name,
+      link,
+      element_text
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Click event tracked successfully",
+      data: {
+        resume_click_events_id: clickEvent.resume_click_events_id
+      }
+    });
+  } catch (error) {
+    console.error('Error tracking click event:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
+    next(error);
+  }
+}
+
 module.exports = {
 	uploadResume,
 	getResumeList,
 	getClientPreview,
 	updateScrollPercentage,
 	trackResumeEvent,
+	updateViewTimeInfo,
+	trackClickEvent,
 };

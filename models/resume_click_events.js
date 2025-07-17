@@ -24,7 +24,11 @@ module.exports = (sequelize, DataTypes) => {
 					key: "resume_share_links_id",
 				},
 			},
-			element_id: {
+			section_name: {
+				type: DataTypes.STRING(255),
+				allowNull: true,
+			},
+			link: {
 				type: DataTypes.STRING(255),
 				allowNull: true,
 			},

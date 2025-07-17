@@ -39,4 +39,18 @@ router.post(
 	resumeController.trackResumeEvent
 );
 
+// POST /v1/resume/update-view-time - Update total time spent and view end time for a resume view
+router.post(
+	"/update-view-time",
+	validateRequest(schemas.updateViewTimeInfo),
+	resumeController.updateViewTimeInfo
+);
+
+// POST /v1/resume/track-click - Track resume click events
+router.post(
+	"/track-click",
+	validateRequest(schemas.trackClickEvent),
+	resumeController.trackClickEvent
+);
+
 module.exports = router;
