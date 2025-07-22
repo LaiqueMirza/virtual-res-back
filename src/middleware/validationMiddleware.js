@@ -130,6 +130,14 @@ const schemas = {
 			"any.required": "Resume uploaded ID is required",
 		}),
 	}),
+
+	// Schema for internal preview
+	internalPreview: Joi.object({
+		resumes_uploaded_id: Joi.number().required().messages({
+			"number.base": "Resume uploaded ID must be a number",
+			"any.required": "Resume uploaded ID is required",
+		}),
+	}),
 };
 
 // Middleware factory for validation

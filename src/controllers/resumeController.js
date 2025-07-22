@@ -4,7 +4,8 @@ const db = require('../../models');
 const { convertToHtml } = require('../utils/documentConverter');
 const nodemailer = require('nodemailer');
 const commonService = require('../services/common');
-const { convertTimeToSeconds, convertSecondsToTime } = require('../utils/helperFun');
+const { convertTimeToSeconds, convertSecondsToTime, enhanceResumeWithAnalytics } = require('../utils/helperFun');
+
 
 /**
  * Upload and process a resume file
@@ -117,12 +118,17 @@ async function getResumeList(req, res, next) {
       [] // optionalInclude
     );
 
+    // Enhance each resume with additional analytics data using helper function
+    const enhancedResumes = await Promise.all(
+      resumes.map(resume => enhanceResumeWithAnalytics(resume))
+    );
+
     const totalPages = Math.ceil(totalResumes / limit);
     
     res.status(200).json({
       success: true,
       data: {
-        resumes,
+        resumes: enhancedResumes,
         pagination: {
           total: totalResumes,
           page,
@@ -534,6 +540,9 @@ async function getResumeAnalytics(req, res, next) {
       });
     }
 
+    // Enhance resume data with analytics using helper function
+    const enhancedResumeData = await enhanceResumeWithAnalytics(resumeData);
+
     // Get all share links for this resume
     const shareLinks = await commonService.findAll("resume_share_links", {
       resumes_uploaded_id
@@ -604,7 +613,10 @@ async function getResumeAnalytics(req, res, next) {
       resume_data: {
         resume_name: resumeData.resume_name,
         uploaded_by: resumeData.uploaded_by,
-        uploaded_at: resumeData.created_at
+        uploaded_at: resumeData.created_at,
+        total_link_count: enhancedResumeData.total_link_count,
+        total_view_count: enhancedResumeData.total_view_count,
+        average_read_time: enhancedResumeData.average_read_time
       },
       resume_shared: resumeShared
     };
@@ -629,6 +641,55 @@ async function getResumeAnalytics(req, res, next) {
   }
 }
 
+/**
+ * Get resume JSON data for internal preview
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+async function internalPreview(req, res, next) {
+  try {
+    const { resumes_uploaded_id } = req.body;
+    
+    if (!resumes_uploaded_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume uploaded ID is required"
+      });
+    }
+
+    // Get resume data by ID
+    const resume = await commonService.findByPk("resumes_uploaded", resumes_uploaded_id);
+
+    if (!resume) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Resume data retrieved successfully",
+      data: {
+        resume_json: resume.resume_json
+      }
+    });
+  } catch (error) {
+    console.error('Error getting internal preview:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
+    next(error);
+  }
+}
+
 module.exports = {
 	uploadResume,
 	getResumeList,
@@ -638,4 +699,5 @@ module.exports = {
 	updateViewTimeInfo,
 	trackClickEvent,
 	getResumeAnalytics,
+	internalPreview,
 };

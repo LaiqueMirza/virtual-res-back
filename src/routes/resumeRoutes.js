@@ -60,4 +60,11 @@ router.post(
 	resumeController.getResumeAnalytics
 );
 
+// POST /v1/resume/internal-preview - Get resume JSON data for internal preview
+router.post(
+	"/internal-preview",
+	validateRequest(schemas.internalPreview),
+	resumeController.internalPreview
+);
+
 module.exports = router;
