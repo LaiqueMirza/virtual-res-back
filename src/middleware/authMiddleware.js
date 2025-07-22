@@ -9,7 +9,12 @@ const jwt = require('jsonwebtoken');
 const authenticateToken = (req, res, next) => {
   // Get the authorization header
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
+  let token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
+  
+  // If token is not in the header, check the request body
+  if (!token) {
+    token = req.body.token;
+  }
 
   if (!token) {
     return res.status(401).json({

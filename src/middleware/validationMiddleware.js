@@ -33,6 +33,7 @@ const schemas = {
 		section_name: Joi.string().allow(null, ""),
 		total_time_spent: Joi.number().allow(null, 0),
 		view_end_time: Joi.date().allow(null),
+		token: Joi.string().allow(null, ""),
 	}),
 
 	// Schema for resume upload
@@ -104,6 +105,7 @@ const schemas = {
 		view_end_time: Joi.date().messages({
 			"date.base": "View end time must be a valid date",
 		}),
+		token: Joi.string().allow(null, ""),
 	}),
 
 	// Schema for tracking click events
@@ -119,6 +121,14 @@ const schemas = {
 		section_name: Joi.string().allow(null, ""),
 		link: Joi.string().allow(null, ""),
 		element_text: Joi.string().allow(null, ""),
+	}),
+
+	// Schema for getting resume analytics
+	getResumeAnalytics: Joi.object({
+		resumes_uploaded_id: Joi.number().required().messages({
+			"number.base": "Resume uploaded ID must be a number",
+			"any.required": "Resume uploaded ID is required",
+		}),
 	}),
 };
 

@@ -1,0 +1,48 @@
+{
+	"success": true,
+	"message": "Resume analytics data retrieved successfully",
+	"data": {
+		"resume_data": {
+			"resume_name": "John's Resume",
+			"uploaded_by": "John Doe",
+			"uploaded_at": "2024-01-15T10:30:00Z"
+		},
+		"resume_shared": [
+			{
+				"email": "client@example.com",
+				"client_name": "ABC Company",
+				"share_type": "email",
+				"expires_at": "2024-02-15T10:30:00Z",
+				"shared_at": "2024-01-15T10:30:00Z",
+				"resume_viewed": [
+					{
+						"viewer_ip": "192.168.1.1",
+						"device_type": "Desktop",
+						"browser_info": "Chrome 120",
+						"user_agent": "Mozilla/5.0...",
+						"location_city": "New York",
+						"location_country": "USA",
+						"referrer_url": "https://google.com",
+						"total_time_spent": "00:05:30",
+						"view_end_time": "2024-01-15T10:35:30Z",
+						"scroll_percentage": 85,
+						"resume_viewed_at": "2024-01-15T10:30:00Z",
+						"resume_view_events": [
+							{
+								"section_name": "Experience",
+								"total_time_spent": "00:02:15"
+							}
+						],
+						"resume_click_events": [
+							{
+								"section_name": "Contact",
+								"link": "mailto:john@example.com",
+								"element_text": "john@example.com"
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}

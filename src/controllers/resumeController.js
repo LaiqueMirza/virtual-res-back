@@ -78,6 +78,17 @@ async function uploadResume(req, res, next) {
       }
     }
     
+    console.error('Error uploading resume:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
+    
     next(error);
   }
 }
@@ -122,6 +133,15 @@ async function getResumeList(req, res, next) {
     });
   } catch (error) {
     console.error('Error fetching resume list:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
     next(error);
   }
 }
@@ -173,8 +193,8 @@ async function getClientPreview(req, res, next) {
     }
     let resumeView;
     if (resume_views_id) {
-      // update resume_views table
-      await commonService.update("resume_views", {
+      // Update resume_views table and check if any rows were affected
+      const updateResult = await commonService.update("resume_views", {
         viewer_ip,
         device_type,
         browser_info,
@@ -206,6 +226,15 @@ async function getClientPreview(req, res, next) {
 		});
   } catch (error) {
     console.error('Error getting client preview:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
     next(error);
   }
 }
@@ -237,12 +266,21 @@ async function updateScrollPercentage(req, res, next) {
       });
     }
 
-    // Update the scroll percentage
-    await commonService.update("resume_views", {
+    // Update the scroll percentage and check if any rows were affected
+    const updateResult = await commonService.update("resume_views", {
       scroll_percentage
     }, {
       resume_views_id
     });
+    
+    // Sequelize update returns [affectedCount, affectedRows]
+    if (!updateResult || updateResult[0] === 0) {
+      console.log(`No rows updated for scroll percentage with resume_views_id: ${resume_views_id}`);
+      return res.status(404).json({
+        success: false,
+        message: "Failed to update scroll percentage. Record may have been deleted."
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -250,6 +288,15 @@ async function updateScrollPercentage(req, res, next) {
     });
   } catch (error) {
     console.error('Error updating scroll percentage:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
     next(error);
   }
 }
@@ -376,13 +423,22 @@ async function updateViewTimeInfo(req, res, next) {
       updatedTotalTimeSpent = convertSecondsToTime(totalSeconds);
     }
 
-    // Update the total_time_spent and view_end_time
-    await commonService.update("resume_views", {
+    // Update the total_time_spent and view_end_time and check if any rows were affected
+    const updateResult = await commonService.update("resume_views", {
       total_time_spent: updatedTotalTimeSpent,
       view_end_time: view_end_time
     }, {
       resume_views_id
     });
+    
+    // Sequelize update returns [affectedCount, affectedRows]
+    if (!updateResult || updateResult[0] === 0) {
+      console.log(`No rows updated for view time info with resume_views_id: ${resume_views_id}`);
+      return res.status(404).json({
+        success: false,
+        message: "Failed to update view time information. Record may have been deleted."
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -451,6 +507,128 @@ async function trackClickEvent(req, res, next) {
   }
 }
 
+/**
+ * Get comprehensive resume analytics data
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+async function getResumeAnalytics(req, res, next) {
+  try {
+    const { resumes_uploaded_id } = req.body;
+    
+    if (!resumes_uploaded_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume uploaded ID is required"
+      });
+    }
+
+    // Get resume data
+    const resumeData = await commonService.findByPk("resumes_uploaded", resumes_uploaded_id);
+    
+    if (!resumeData) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found"
+      });
+    }
+
+    // Get all share links for this resume
+    const shareLinks = await commonService.findAll("resume_share_links", {
+      resumes_uploaded_id
+    });
+
+    // For each share link, get all views
+    const resumeShared = [];
+    
+    for (const shareLink of shareLinks) {
+      const views = await commonService.findAll("resume_views", {
+        resume_share_links_id: shareLink.resume_share_links_id
+      });
+
+      const resumeViewed = [];
+      
+      for (const view of views) {
+        // Get resume view events for this view
+        const viewEvents = await commonService.findAll("resume_view_events", {
+          resume_views_id: view.resume_views_id
+        });
+
+        // Get resume click events for this view
+        const clickEvents = await commonService.findAll("resume_click_events", {
+          resume_views_id: view.resume_views_id
+        });
+
+        // Format view events
+        const resumeViewEvents = viewEvents.map(event => ({
+          section_name: event.section_name,
+          total_time_spent: event.total_time_spent
+        }));
+
+        // Format click events
+        const resumeClickEvents = clickEvents.map(event => ({
+          section_name: event.section_name,
+          link: event.link,
+          element_text: event.element_text
+        }));
+
+        resumeViewed.push({
+          viewer_ip: view.viewer_ip,
+          device_type: view.device_type,
+          browser_info: view.browser_info,
+          user_agent: view.user_agent,
+          location_city: view.location_city,
+          location_country: view.location_country,
+          referrer_url: view.referrer_url,
+          total_time_spent: view.total_time_spent,
+          view_end_time: view.view_end_time,
+          scroll_percentage: view.scroll_percentage,
+          resume_viewed_at: view.created_at,
+          resume_view_events: resumeViewEvents,
+          resume_click_events: resumeClickEvents
+        });
+      }
+
+      resumeShared.push({
+        email: shareLink.email,
+        client_name: shareLink.client_name,
+        share_type: shareLink.share_type,
+        expires_at: shareLink.expires_at,
+        shared_at: shareLink.created_at,
+        resume_viewed: resumeViewed
+      });
+    }
+
+    const responseData = {
+      resume_data: {
+        resume_name: resumeData.resume_name,
+        uploaded_by: resumeData.uploaded_by,
+        uploaded_at: resumeData.created_at
+      },
+      resume_shared: resumeShared
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "Resume analytics data retrieved successfully",
+      data: responseData
+    });
+  } catch (error) {
+    console.error('Error getting resume analytics:', error);
+    // Handle connection timeout errors gracefully
+    if (error.name === 'SequelizeConnectionError' || error.message.includes('ETIMEDOUT')) {
+      console.log('Database connection timed out. The operation will be retried automatically.');
+      return res.status(503).json({
+        success: false,
+        message: 'Service temporarily unavailable. Please try again later.',
+        retryable: true
+      });
+    }
+    next(error);
+  }
+}
+
 module.exports = {
 	uploadResume,
 	getResumeList,
@@ -459,4 +637,5 @@ module.exports = {
 	trackResumeEvent,
 	updateViewTimeInfo,
 	trackClickEvent,
+	getResumeAnalytics,
 };

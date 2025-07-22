@@ -53,4 +53,11 @@ router.post(
 	resumeController.trackClickEvent
 );
 
+// POST /v1/resume/analytics - Get comprehensive resume analytics data
+router.post(
+	"/analytics",
+	validateRequest(schemas.getResumeAnalytics),
+	resumeController.getResumeAnalytics
+);
+
 module.exports = router;
