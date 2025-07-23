@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
 				allowNull: true,
 			},
 			browser_info: {
-				type: DataTypes.STRING(128),
+				type: DataTypes.TEXT,
 				allowNull: true,
 			},
 			user_agent: {

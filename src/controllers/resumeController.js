@@ -198,19 +198,27 @@ async function getClientPreview(req, res, next) {
       });
     }
     let resumeView;
-    if (resume_views_id) {
-      // Update resume_views table and check if any rows were affected
-      const updateResult = await commonService.update("resume_views", {
-        viewer_ip,
-        device_type,
-        browser_info,
-        location_city,
-        location_country,
-        referrer_url,
-      }, {
-        resume_views_id
-      });
-    } else {
+    let checkResumeView;
+    if(resume_views_id) {
+      checkResumeView = await commonService.findByPk("resume_views", resume_views_id);
+    }
+    if (checkResumeView) {
+			// Update resume_views table and check if any rows were affected
+			const updateResult = await commonService.update(
+				"resume_views",
+				{
+					viewer_ip,
+					device_type,
+					browser_info,
+					location_city,
+					location_country,
+					referrer_url,
+				},
+				{
+					resume_views_id,
+				}
+			);
+		} else {
 			// Insert view data into resume_views table
 			resumeView = await commonService.create("resume_views", {
 				resume_share_links_id,
