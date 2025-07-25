@@ -160,7 +160,7 @@ async function getResumeList(req, res, next) {
  */
 async function getClientPreview(req, res, next) {
   try {
-    const { resume_share_links_id, viewer_ip, device_type, browser_info, location_city, location_country, resume_views_id, referrer_url } = req.body;
+    const { resume_share_links_id, viewer_ip, device_type, browser_info, location_city, location_country, resume_views_id } = req.body;
     
     if (!resume_share_links_id) {
       return res.status(400).json({
@@ -172,7 +172,7 @@ async function getClientPreview(req, res, next) {
     // Find valid share link using Sequelize
     const shareLink = await commonService.findOne("resume_share_links", {
       resume_share_links_id,
-      is_active: true,
+      deleted_at: null,
       expires_at: {
         [db.Sequelize.Op.or]: [
           { [db.Sequelize.Op.gt]: new Date() },
@@ -212,7 +212,6 @@ async function getClientPreview(req, res, next) {
 					browser_info,
 					location_city,
 					location_country,
-					referrer_url,
 				},
 				{
 					resume_views_id,
@@ -227,7 +226,6 @@ async function getClientPreview(req, res, next) {
 				browser_info,
 				location_city,
 				location_country,
-				referrer_url,
 			});
 		}
 
@@ -597,7 +595,6 @@ async function getResumeAnalytics(req, res, next) {
           user_agent: view.user_agent,
           location_city: view.location_city,
           location_country: view.location_country,
-          referrer_url: view.referrer_url,
           total_time_spent: view.total_time_spent,
           view_end_time: view.view_end_time,
           scroll_percentage: view.scroll_percentage,
@@ -610,6 +607,7 @@ async function getResumeAnalytics(req, res, next) {
       resumeShared.push({
         email: shareLink.email,
         client_name: shareLink.client_name,
+        referrer_url: shareLink.referrer_url,
         share_type: shareLink.share_type,
         expires_at: shareLink.expires_at,
         shared_at: shareLink.created_at,

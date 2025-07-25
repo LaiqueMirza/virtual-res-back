@@ -1,7 +1,7 @@
-const { resumeShareLinkExpireDate } = require('../../constants/common');
-const nodemailer = require('nodemailer');
-const commonService = require('../services/common');
-const db = require('../../models');
+const { resumeShareLinkExpireDate } = require("../../constants/common");
+const nodemailer = require("nodemailer");
+const commonService = require("../services/common");
+const db = require("../../models");
 
 /**
  * Share resume via email
@@ -11,7 +11,7 @@ const db = require('../../models');
  */
 async function shareResumeByEmail(req, res, next) {
 	try {
-		const { emails, resumes_uploaded_id } = req.body;
+		const { emails, resumes_uploaded_id, referrer_url } = req.body;
 
 		// Validate request body
 		if (!emails || !Array.isArray(emails) || emails.length === 0) {
@@ -49,7 +49,6 @@ async function shareResumeByEmail(req, res, next) {
 				email: email,
 				share_type: "email",
 				expires_at: resumeShareLinkExpireDate,
-				is_active: true,
 			});
 			shareLinks.push(shareLink);
 		}
@@ -68,14 +67,25 @@ async function shareResumeByEmail(req, res, next) {
 		// Send emails
 		const emailPromises = shareLinks.map(async (shareLink) => {
 			// Encode the resume_share_links_id with base64
-			const encodedId = Buffer.from(shareLink.resume_share_links_id.toString()).toString('base64');
-			
+			const encodedId = Buffer.from(
+				shareLink.resume_share_links_id.toString()
+			).toString("base64");
+			const referrer_url_value = referrer_url + "/view/" + encodedId;
+			await commonService.update(
+				"resume_share_links",
+				{
+					referrer_url: referrer_url_value,
+				},
+				{
+					resume_share_links_id: shareLink.resume_share_links_id,
+				}
+			);
 			const mailOptions = {
 				from: "mirzalaique2ey@gmail.com",
 				to: shareLink.email,
 				subject: "Resume Share Link",
-				text: `Click the below link to view the resume: ${process.env.FRONTEND_URL}/view/${encodedId}`,
-				html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="${process.env.FRONTEND_URL}/view/${encodedId}">View Resume: ${resume.resume_name}</a></p>`,
+				text: `Click the below link to view the resume: ${referrer_url_value}`,
+				html: `<p>Click the below link to view the resume:</p><p><a target="_blank" href="${referrer_url_value}">View Resume: ${resume.resume_name}</a></p>`,
 			};
 
 			const info = await transporter.sendMail(mailOptions);
@@ -111,7 +121,7 @@ async function shareResumeByEmail(req, res, next) {
  */
 async function generateShareLink(req, res, next) {
 	try {
-		const { client_name, resumes_uploaded_id } = req.body;
+		const { client_name, resumes_uploaded_id, referrer_url } = req.body;
 
 		// Validate request body
 		if (!client_name || !client_name.trim()) {
@@ -147,12 +157,18 @@ async function generateShareLink(req, res, next) {
 			client_name: client_name,
 			share_type: "link",
 			expires_at: resumeShareLinkExpireDate,
-			is_active: true,
 		});
 
 		// Encode the resume_share_links_id with base64
-		const encodedId = Buffer.from(shareLink.resume_share_links_id.toString()).toString('base64');
-		
+		const encodedId = Buffer.from(
+			shareLink.resume_share_links_id.toString()
+		).toString("base64");
+		const referrer_url_value = referrer_url + "/view/" + encodedId;
+		await commonService.update(
+			"resume_share_links",
+			{ referrer_url: referrer_url_value },
+			{ resume_share_links_id: shareLink.resume_share_links_id }
+		);
 		res.status(200).json({
 			success: true,
 			message: "Share link generated successfully",
@@ -161,7 +177,6 @@ async function generateShareLink(req, res, next) {
 				expires_at: shareLink.expires_at,
 			},
 		});
-
 	} catch (error) {
 		console.error("Error generating share link:", error);
 		next(error);

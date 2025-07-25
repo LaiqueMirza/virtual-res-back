@@ -13,11 +13,7 @@ const schemas = {
 		browser_info: Joi.string().allow(null, ""),
 		location_city: Joi.string().allow(null, ""),
 		location_country: Joi.string().allow(null, ""),
-		referrer_url: Joi.string().required().messages({
-			"string.empty": "Referrer URL is required",
-			"any.required": "Referrer URL is required",
-		}),
-		resume_views_id: Joi.number().allow(null, 0)
+		resume_views_id: Joi.number().allow(null, 0),
 	}),
 
 	// Schema for tracking resume view events
@@ -54,6 +50,10 @@ const schemas = {
 			"array.base": "Emails must be an array",
 			"any.required": "Recipient emails is required",
 		}),
+		referrer_url: Joi.string().required().messages({
+			"string.empty": "Referrer URL is required",
+			"any.required": "Referrer URL is required",
+		}),
 		// senderName: Joi.string().required().messages({
 		// 	"string.empty": "Sender name is required",
 		// 	"any.required": "Sender name is required",
@@ -69,6 +69,10 @@ const schemas = {
 		client_name: Joi.string().required().messages({
 			"string.empty": "client_name is required",
 			"any.required": "client_name is required",
+		}),
+		referrer_url: Joi.string().required().messages({
+			"string.empty": "Referrer URL is required",
+			"any.required": "Referrer URL is required",
 		}),
 	}),
 

@@ -40,10 +40,6 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.STRING(128),
 				allowNull: true,
 			},
-			referrer_url: {
-				type: DataTypes.TEXT,
-				allowNull: true,
-			},
 			total_time_spent: {
 				type: DataTypes.TIME,
 				allowNull: true,
