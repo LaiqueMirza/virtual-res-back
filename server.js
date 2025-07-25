@@ -8,6 +8,7 @@ dotenv.config();
 
 // Import routes, middleware, and database
 const resumeRoutes = require('./src/routes/resumeRoutes');
+const openResumeRoutes = require("./src/routes/openResumeRoutes");
 const authRoutes = require('./src/routes/authRoutes');
 const { authenticateToken } = require('./src/middleware/authMiddleware');
 const { sequelize } = require('./models');
@@ -43,8 +44,11 @@ app.use('/resume_uploads', express.static('resume_uploads'));
 // Auth routes (unprotected)
 app.use('/api', authRoutes);
 
+// UnProtected routes (require authentication)
+app.use("/v1/resume",  openResumeRoutes);
+
 // Protected routes (require authentication)
-app.use('/v1/resume', authenticateToken, resumeRoutes);
+app.use("/v1/resume", authenticateToken, resumeRoutes);
 
 // Default route
 app.post('/', (req, res) => {
