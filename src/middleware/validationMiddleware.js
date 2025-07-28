@@ -29,7 +29,6 @@ const schemas = {
 		section_name: Joi.string().allow(null, ""),
 		total_time_spent: Joi.number().allow(null, 0),
 		view_end_time: Joi.date().allow(null),
-		token: Joi.string().allow(null, ""),
 	}),
 
 	// Schema for resume upload
@@ -109,7 +108,6 @@ const schemas = {
 		view_end_time: Joi.date().messages({
 			"date.base": "View end time must be a valid date",
 		}),
-		token: Joi.string().allow(null, ""),
 	}),
 
 	// Schema for tracking click events
@@ -149,7 +147,8 @@ const validateRequest = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body, { abortEarly: false });
     
-    if (error) {
+	  if (error) {
+	  console.log("error in validateRequest", req.url, req.body, "eroor:",error)
       const errorMessages = error.details.map(detail => detail.message);
       return res.status(400).json({
         success: false,

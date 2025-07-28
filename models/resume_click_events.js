@@ -25,15 +25,15 @@ module.exports = (sequelize, DataTypes) => {
 				},
 			},
 			section_name: {
-				type: DataTypes.STRING(255),
+				type: DataTypes.TEXT,
 				allowNull: true,
 			},
 			link: {
-				type: DataTypes.STRING(255),
+				type: DataTypes.TEXT,
 				allowNull: true,
 			},
 			element_text: {
-				type: DataTypes.STRING(255),
+				type: DataTypes.TEXT,
 				allowNull: true,
 			},
 		},
