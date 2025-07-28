@@ -202,7 +202,10 @@ async function getClientPreview(req, res, next) {
     if(resume_views_id) {
       checkResumeView = await commonService.findByPk("resume_views", resume_views_id);
     }
-    if (checkResumeView) {
+    if (
+			checkResumeView &&
+			checkResumeView.resume_share_links_id == resume_share_links_id
+		) {
 			// Update resume_views table and check if any rows were affected
 			const updateResult = await commonService.update(
 				"resume_views",
@@ -585,7 +588,8 @@ async function getResumeAnalytics(req, res, next) {
         const resumeClickEvents = clickEvents.map(event => ({
           section_name: event.section_name,
           link: event.link,
-          element_text: event.element_text
+          element_text: event.element_text,
+          created_at: event.created_at
         }));
 
         resumeViewed.push({
