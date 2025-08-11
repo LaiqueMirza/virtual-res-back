@@ -169,22 +169,16 @@ async function getClientPreview(req, res, next) {
       });
     }
 
-    // Find valid share link using Sequelize
+    // Find valid share link using Sequelize - no expiration check as links never expire
     const shareLink = await commonService.findOne("resume_share_links", {
       resume_share_links_id,
-      deleted_at: null,
-      expires_at: {
-        [db.Sequelize.Op.or]: [
-          { [db.Sequelize.Op.gt]: new Date() },
-          { [db.Sequelize.Op.eq]: null }
-        ]
-      }
+      deleted_at: null
     });
 
     if (!shareLink) {
       return res.status(404).json({
         success: false,
-        message: "Share link not found or expired"
+        message: "Share link not found"
       });
     }
 

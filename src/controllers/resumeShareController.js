@@ -1,4 +1,4 @@
-const { resumeShareLinkExpireDate } = require("../../constants/common");
+const { resumeShareLinkate } = require("../../constants/common");
 const nodemailer = require("nodemailer");
 const commonService = require("../services/common");
 const db = require("../../models");
@@ -48,7 +48,7 @@ async function shareResumeByEmail(req, res, next) {
 				resumes_uploaded_id: resumes_uploaded_id,
 				email: email,
 				share_type: "email",
-				expires_at: resumeShareLinkExpireDate,
+				expires_at: null, // Links never expire
 			});
 			shareLinks.push(shareLink);
 		}
@@ -153,11 +153,11 @@ async function generateShareLink(req, res, next) {
 
 		// Create share link
 		const shareLink = await commonService.create("resume_share_links", {
-			resumes_uploaded_id: resumes_uploaded_id,
-			client_name: client_name,
-			share_type: "link",
-			expires_at: resumeShareLinkExpireDate,
-		});
+      resumes_uploaded_id: resumes_uploaded_id,
+      client_name: client_name,
+      share_type: "link",
+      expires_at: null, // Links never expire
+    });
 
 		// Encode the resume_share_links_id with base64
 		const encodedId = Buffer.from(

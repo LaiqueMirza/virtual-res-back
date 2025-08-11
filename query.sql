@@ -32,7 +32,7 @@ CREATE TABLE resume_share_links (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   expires_at DATETIME,                  -- Optional: expiry time
-  is_active BOOLEAN DEFAULT TRUE,
+  deleted_at DATETIME,
   CONSTRAINT fk_resumes_uploaded_id FOREIGN KEY (resumes_uploaded_id)
     REFERENCES resumes_uploaded(resumes_uploaded_id)
     ON DELETE CASCADE
